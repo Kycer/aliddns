@@ -131,7 +131,8 @@ func updateDomain(ddnsConfig *DDNSConfig, domain *Domain, client *alidns.Client)
 }
 
 func update() {
-	for _, ddnsConfig := range CONFIG_MAP {
+	for key, ddnsConfig := range CONFIG_MAP {
+		ddnsConfig.AliAccess.Domain = key
 		// 获取DDNS客户端
 		client := getClient(ddnsConfig.AliAccess)
 
@@ -142,22 +143,20 @@ func update() {
 	}
 }
 
-var run = flag.Bool("r", false, "bool类型参数")
-var one = flag.Bool("o", false, "string类型参数")
+var run = flag.Uint64("r", 30, "定时执行，30分钟执行一次")
+var one = flag.Bool("o", true, "单次执行, 默认为false")
 
 func main() {
 	loadConfigs()
 	flag.Parse()
+	log.Println(*one)
 	if *one {
 		log.Println("执行一次.............")
 		update()
 		log.Println("结束执行.............")
-	}
-
-	if *run {
-		log.Println("启动任务.............")
+	} else {
 		s := gocron.NewScheduler()
-		s.Every(30).Minutes().Do(update)
+		s.Every(*run).Minutes().DoSafely(update)
 		<-s.Start()
 	}
 
