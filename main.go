@@ -143,18 +143,19 @@ func update() {
 	}
 }
 
-var run = flag.Uint64("r", 30, "定时执行，30分钟执行一次")
+var run = flag.Uint64("e", 30, "定时执行，默认30分钟执行一次")
 var one = flag.Bool("o", true, "单次执行, 默认为false")
 
 func main() {
 	loadConfigs()
 	flag.Parse()
-	log.Println(*one)
 	if *one {
 		log.Println("执行一次.............")
 		update()
 		log.Println("结束执行.............")
 	} else {
+		log.Printf("定时执行，%d分钟一次.............", *run)
+		update()
 		s := gocron.NewScheduler()
 		s.Every(*run).Minutes().DoSafely(update)
 		<-s.Start()
