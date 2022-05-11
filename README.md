@@ -4,6 +4,7 @@
 - 创建配置文件
 ```shell
 mkdir ~/.config/aliddns
+mv ./aliddns ~/.config/aliddns
 cd ~/.config/aliddns
 touch 域名.toml # touch github.com.toml
 ```
@@ -37,6 +38,7 @@ touch 域名.toml # touch github.com.toml
     ```
 - 启动
 ```shell
+
 ./aliddns  # 执行一次
 ./aliddns -o=false -e=20  # 每20分钟一次
 nohup ./aliddns -o=false -e=1 & # 后台启动
