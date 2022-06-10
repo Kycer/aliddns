@@ -16,7 +16,7 @@ import (
 	"github.com/jasonlvhit/gocron"
 )
 
-var ConfigPath = []string{"~/.config/aliddns", "./configs"}
+var ConfigPath = []string{"~/.config/aliddns", "/etc/aliddns", "./configs"}
 
 var ConfigMap = make(map[string]*DDNSConfig)
 
@@ -40,8 +40,12 @@ type Domain struct {
 	Value      string
 }
 
-func getIP() string {
-	responseClient, err := http.Get("https://ipv4.ipw.cn/api/ip/myip")
+func getIP(domainType *string) string {
+	var url = "https://ipv4.ipw.cn/api/ip/myip"
+	if *domainType == "AAAA" {
+		url = "https://ipv6.ipw.cn/api/ip/myip"
+	}
+	responseClient, err := http.Get(url)
 
 	if err != nil {
 		log.Printf("获取外网 IP 失败，请检查网络\n")
@@ -133,7 +137,7 @@ func updateDomain(ddnsConfig *DDNSConfig, domain *Domain, client *alidns.Client)
 	record := getRecord(&domain.Rr, ddnsConfig, client)
 	ip := domain.Value
 	if domain.UpdateType == "network" {
-		ip = getIP()
+		ip = getIP(&domain.DomainType)
 	}
 	if ip == *record.Value {
 		log.Printf("[%s]IP一致，无需更新 => [%s]", domain.Rr, ip)
